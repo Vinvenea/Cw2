@@ -2,39 +2,53 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace Cw2
 {
-    class Student
+    public class Student
     {
-     public String fName { get; set; }
-     public String lName { get; set; }
-     public  String studies;
-     public   String modeofStudies;
-     public  String index { get; set; }
-     public DateTime birthdate;
-     public String email;
-     public  String mothersName;
-     public String fathersName;
+        [XmlAttribute(AttributeName = "student")]
+        public String index { get; set; }
+        [XmlElement(ElementName = "student")]
+        public String fName { get; set; }
+       
+        public String lName { get; set; }
+
+        public String birthdate { get; set; }
+
+        public String email{get;set;}
+        
+        public String mothersName { get; set; }
+       
+        public String fathersName { get; set; }
+       
+        public Studies studies { get; set; }
+        
+     public Student()
+        {
+
+        }
         
         public Student(String fname, String lName, String studies, String modeOfStudies, String index, String birthdate, String email, String motherName, String fathersName)
         {
             this.fName = fname;
             this.lName = lName;
-            this.studies = studies;
-            this.modeofStudies = modeOfStudies;
-            this.index = index;
+            this.studies = new Studies(studies, modeOfStudies);
+            this.index = "s"+index;
             this.email = email;
-            this.birthdate = DateTime.Parse(birthdate);
+            this.birthdate = birthdate;
+            this.mothersName = motherName;
+            this.fathersName = fathersName;
             
         }
         public override string ToString() {
-            return fName+";"+lName+";"+studies+";"+modeofStudies+";"+index+";"+email+";"+birthdate.ToShortDateString();
+            return fName+";"+lName+";"+studies.name+";"+studies.mode+";"+index+";"+email+";"+birthdate;
 
         }
         public bool IfStudent()
         {
-            if(fName == "" || lName == "" || studies == ""||modeofStudies == ""|| index == "" || email ==""||mothersName == ""||fathersName =="")
+            if(fName == "" || lName == "" || studies.name == ""||studies.mode == ""|| index == "" || email ==""||mothersName == ""||fathersName =="")
             {
                 return true;
             }
@@ -45,15 +59,4 @@ namespace Cw2
 
     } 
 }
- class OwnComparer : IEqualityComparer<Student> {
-    public bool Equals(Student x, Student y)
-    {
-        return StringComparer.InvariantCultureIgnoreCase.Equals($"{x.fName}{x.lName}{x.index}", $"{y.fName}{y.lName}{y.index}");
-    }
-    public int GetHashCode(Student obj)
-    {
-        return StringComparer
-            .InvariantCultureIgnoreCase
-            .GetHashCode($"{obj.fName}{obj.lName}{obj.index}");
-    }
-}
+ 

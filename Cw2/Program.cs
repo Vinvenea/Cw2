@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-
+using System.Xml.Schema;
+using System.Xml.Serialization;
 
 namespace Cw2
 {
@@ -11,50 +12,93 @@ namespace Cw2
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
-            var path = @"C:\Users\vinve\Desktop\APBD\Zajęcia 2\dane.csv";
-            var lines = File.ReadLines(path);
-            var set = new HashSet<Student>(new OwnComparer());
-            var cleanedSet = new HashSet<Student>(new OwnComparer());
-            var logArray = new List<Student>();
-            foreach (var line in lines)
+            try
             {
-                string[] dane = line.Split(',');
-               
-                if (dane.Length != 9)
-                {
-                    // line do loga
-                }
-                else
-                { 
-                    Student nextStudent = new Student(dane[0], dane[1], dane[2], dane[3], dane[4], dane[5], dane[6], dane[7], dane[8]);
-                    if (!set.Add(nextStudent))
-                    {
-                        logArray.Add(nextStudent);                    }
-                   
-                }
-                
+                var path = @args[0]; //@"C:\Users\vinve\Desktop\APBD\Zajęcia 2\dane.csv";
+                var pathtoSave = @args[1];
+                var typeFile = args[2];
 
-            }
-            
-            foreach (Student i in set)
+                var lines = File.ReadLines(path);
+                var set = new HashSet<Student>(new OwnComparer());
+                var cleanedSet = new HashSet<Student>(new OwnComparer());
+                using (StreamWriter toLogWriter = new StreamWriter(@"./log.txt"))
+
+                {
+                    Console.WriteLine(@".");
+                    foreach (var line in lines)
+                    {
+                        string[] dane = line.Split(',');
+
+                        if (dane.Length != 9)
+                        {
+                            toLogWriter.WriteLine(line);
+                        }
+                        else
+                        {
+                            Student nextStudent = new Student(dane[0], dane[1], dane[2], dane[3], dane[4], dane[5], dane[6], dane[7], dane[8]);
+                            if (!set.Add(nextStudent))
+                            {
+                                toLogWriter.WriteLine(nextStudent.ToString());
+
+                            }
+
+                        }
+
+
+                    }
+
+                    foreach (Student i in set)
+                    {
+                        if (i.IfStudent())
+                        {
+                            toLogWriter.WriteLine(i.ToString());
+
+                        }
+                        else
+                        {
+                            cleanedSet.Add(i);
+                        }
+
+
+                    }
+
+                    XmlRootAttribute xm = new XmlRootAttribute();
+
+
+                    xm.ElementName = "uczelnia " + "createdAt " + DateTime.Today.ToShortDateString() + " Author Natalia Kowalska";
+
+                    XmlSerializer serializer = new XmlSerializer(typeof(HashSet<Student>), xm);
+
+
+
+                    try
+                    {
+                        StreamWriter streamWriter = new StreamWriter(pathtoSave);
+
+
+                        serializer.Serialize(streamWriter, cleanedSet);
+
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                        // obsluga wyjatkow
+                    }
+
+
+
+                }
+            }catch(IndexOutOfRangeException e)
             {
-                if (i.IfStudent())
-                {
-                    Console.WriteLine(i.fathersName);
-                    logArray.Add(i);
-                }
-                else
-                {
-                    cleanedSet.Add(i);
-                }
-               
-              
+                Console.WriteLine("Za malo argumentow");
+            }catch(ArgumentException e)
+            {
+                Console.WriteLine("Podana sciezka jest niepoprawna");
+            }catch(FileNotFoundException e)
+            {
+                Console.WriteLine("Plik nie istnieje");
             }
-Console.WriteLine(cleanedSet.Count());
-            Console.WriteLine(logArray.Count());
-            var today = DateTime.Today.ToShortDateString();
         }
     }
-}
 
+}
